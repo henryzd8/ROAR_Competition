@@ -86,7 +86,7 @@ class RoarCompetitionSolution:
         speed_profile = np.sqrt(
             lateral_acceleration_limit / np.maximum(curvature, 1e-4)
         )
-        speed_profile = np.clip(speed_profile, 18.5, 65.0)
+        speed_profile = np.clip(speed_profile, 17.0, 65.0)
 
         # Propagate each corner's limit backwards using the braking equation.
         segment_lengths = np.linalg.norm(np.roll(path, -1, axis=0) - path, axis=1)
