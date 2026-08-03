@@ -82,11 +82,11 @@ class RoarCompetitionSolution:
         curvature = np.maximum.reduce(
             [np.roll(curvature, offset) for offset in range(-3, 4)]
         )
-        lateral_acceleration_limit = 25.0
+        lateral_acceleration_limit = 20.0
         speed_profile = np.sqrt(
             lateral_acceleration_limit / np.maximum(curvature, 1e-4)
         )
-        speed_profile = np.clip(speed_profile, 17.0, 80.0)
+        speed_profile = np.clip(speed_profile, 17.0, 70.0)
 
         # The two tight Monza chicanes define the stability boundary.  Keep
         # them at the proven-safe v4 speed while allowing faster medium turns.
@@ -97,7 +97,7 @@ class RoarCompetitionSolution:
 
         # Propagate each corner's limit backwards using the braking equation.
         segment_lengths = np.linalg.norm(np.roll(path, -1, axis=0) - path, axis=1)
-        maximum_deceleration = 18.0
+        maximum_deceleration = 16.0
         for _ in range(4):
             for index in range(waypoint_count - 1, -1, -1):
                 next_index = (index + 1) % waypoint_count
