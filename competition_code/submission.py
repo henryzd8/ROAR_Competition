@@ -82,15 +82,15 @@ class RoarCompetitionSolution:
         curvature = np.maximum.reduce(
             [np.roll(curvature, offset) for offset in range(-3, 4)]
         )
-        lateral_acceleration_limit = 11.5
+        lateral_acceleration_limit = 15.0
         speed_profile = np.sqrt(
             lateral_acceleration_limit / np.maximum(curvature, 1e-4)
         )
-        speed_profile = np.clip(speed_profile, 14.0, 55.0)
+        speed_profile = np.clip(speed_profile, 17.0, 60.0)
 
         # Propagate each corner's limit backwards using the braking equation.
         segment_lengths = np.linalg.norm(np.roll(path, -1, axis=0) - path, axis=1)
-        maximum_deceleration = 12.0
+        maximum_deceleration = 14.0
         for _ in range(4):
             for index in range(waypoint_count - 1, -1, -1):
                 next_index = (index + 1) % waypoint_count
