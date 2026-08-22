@@ -1,13 +1,13 @@
 # ROAR_Competition
 
-ROAR Simulation Racing Series — [Summer 2026](https://roar.berkeley.edu/simulation-racing/)
+[ROAR Simulation Racing Series](https://roar.berkeley.edu/simulation-racing/) — Summer 2026
 
 Monza Map v1.1 : Best clean time 320.20s
 
 ## Provenance
 
 The controller evolved through discussions and simulation trials with assistance
-from AI agents, informed by the [ROAR past results](https://roar.berkeley.edu/past-results/),
+from AI agents, informed with the [ROAR past results](https://roar.berkeley.edu/past-results/),
 and included tuning and contributions adapted from publicly reviewed repositories.
 
 ## Design overview
