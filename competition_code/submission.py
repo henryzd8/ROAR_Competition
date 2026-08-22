@@ -1515,7 +1515,7 @@ loc: ({vehicle_location[0]:.2f}, {vehicle_location[1]:.2f}) wp({wpl[0]:.1f}, {wp
             # shorter target restores lap-2 stability after the Section 3 braking
             # horizon was reduced to 24 ticks, while a global change loses speed.
             if self.current_section == 5 and 1320 <= self.current_waypoint_index < 1360:
-                distance_gain = 0.24
+                distance_gain = 0.245
             distance = distance_gain * current_speed
             distance = np.clip(distance, 30, 70)
             location, _ = self.racing_path.point_at_distance(vehicle_location, distance)
