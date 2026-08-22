@@ -32,7 +32,7 @@ The file is organized as seven cooperating logical modules:
 
 ## ROAR Monza optimization results
 
-- Test date: 2026-08-22
+- Test date: 2026-08-21
 - Map: Monza v1.1
 - CARLA client: 0.9.12
 - Simulator: 0.9.12-dirty
@@ -51,10 +51,10 @@ The file is organized as seven cooperating logical modules:
 | v8 | DNF | 0 observed | Off track/stuck | 25.0 m/s^2 outside critical corners |
 | v9 | 400.10 s | 0 | Finished | 20.0 m/s^2 outside critical corners; 17 m/s cap in critical corners |
 | v10 | 398.05 s | 0 observed | Finished | Full 83 m/s straight envelope, one-tick gearbox launch, and validated 17.5 m/s^2 braking propagation |
-| v11 | **327.70 s** | **0 observed** | Finished | Optimized racing line with Menger-curvature, section-specific friction, steering, and speed control |
-| v12 | **321.65 s** | **0 observed** | Finished | Reactive three-point Menger-radius speed target, section-specific friction and heading-PID gains, a 0.80 hard-brake threshold, and two fixed low-brake stability zones on one optimized path |
-| v13 | **320.35 s** | **0 observed** | Finished | Dense racing-line tracker with speed-scheduled and distance-based lookahead, multi-radius braking preview, exact 10-section state, a 24-tick Section 3 braking horizon, and localized Section 5 `distance_gain=0.24` tuning |
-| v14 | **320.20 s** | **0 observed** | Finished | Raise the localized Section 5 `distance_gain` from 0.24 to 0.245 at waypoints 1320-1359, retaining all other v13 controller settings |
+| v11 | **327.70 s** | 0 observed | Finished | Optimized racing line with Menger-curvature, section-specific friction, steering, and speed control |
+| v12 | **321.65 s** | 0 observed | Finished | Reactive three-point Menger-radius speed target, section-specific friction and heading-PID gains, a 0.80 hard-brake threshold, and two fixed low-brake stability zones on one optimized path |
+| v13 | **320.35 s** | 0 observed | Finished | Dense racing-line tracker with speed-scheduled and distance-based lookahead, multi-radius braking preview, exact 10-section state, a 24-tick Section 3 braking horizon, and localized Section 5 `distance_gain=0.24` tuning |
+| v14 | **320.20 s** | 0 observed | Finished | Raise the localized Section 5 `distance_gain` from 0.24 to 0.245 at waypoints 1320-1359, retaining all other v13 controller settings |
 
 Best observed validated result: **320.20 seconds**. A second clean fresh-restart
 run completed in **320.25 seconds**, reflecting normal simulation variation. The
