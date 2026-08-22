@@ -82,15 +82,15 @@ class RoarCompetitionSolution:
         curvature = np.maximum.reduce(
             [np.roll(curvature, offset) for offset in range(-3, 4)]
         )
-        lateral_acceleration_limit = 6.5
+        lateral_acceleration_limit = 8.5
         speed_profile = np.sqrt(
             lateral_acceleration_limit / np.maximum(curvature, 1e-4)
         )
-        speed_profile = np.clip(speed_profile, 10.0, 40.0)
+        speed_profile = np.clip(speed_profile, 12.0, 48.0)
 
         # Propagate each corner's limit backwards using the braking equation.
         segment_lengths = np.linalg.norm(np.roll(path, -1, axis=0) - path, axis=1)
-        maximum_deceleration = 8.0
+        maximum_deceleration = 10.0
         for _ in range(4):
             for index in range(waypoint_count - 1, -1, -1):
                 next_index = (index + 1) % waypoint_count
@@ -137,7 +137,7 @@ class RoarCompetitionSolution:
         )
 
         # Increase geometric lookahead with speed for stable high-speed tracking.
-        lookahead_metres = np.clip(7.0 + 0.45 * vehicle_velocity_norm, 8.0, 26.0)
+        lookahead_metres = np.clip(7.0 + 0.50 * vehicle_velocity_norm, 8.0, 30.0)
         lookahead_waypoints = int(round(lookahead_metres / self.waypoint_spacing))
         target_index = (
             self.current_waypoint_idx + lookahead_waypoints
@@ -152,7 +152,7 @@ class RoarCompetitionSolution:
         delta_heading = normalize_rad(heading_to_waypoint - vehicle_rotation[2])
 
         # Heading controller with mild smoothing to avoid steering oscillation.
-        raw_steer = np.clip(-1.8 * delta_heading, -1.0, 1.0)
+        raw_steer = np.clip(-1.7 * delta_heading, -1.0, 1.0)
         steer_control = 0.75 * raw_steer + 0.25 * self.previous_steer
         self.previous_steer = steer_control
 
