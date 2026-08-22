@@ -8,7 +8,7 @@ Monza Map v1.1 · Best clean time 320.20s
 
 The controller evolved through discussions and simulation trials with assistance
 from AI agents, informed by the [ROAR past results](https://roar.berkeley.edu/past-results/),
-and includes tuning and contributions adapted from publicly reviewed repositories.
+and included tuning and contributions adapted from publicly reviewed repositories.
 
 ## Design overview
 
@@ -49,8 +49,8 @@ The file is organized as seven cooperating logical modules:
 | v6 | DNF | 0 observed | Off track/stuck | Interpolated global limit, 18.5 m/s minimum |
 | v7 | 409.05 s | 0 | Finished | 17.5 m/s^2 lateral limit with 17 m/s minimum |
 | v8 | DNF | 0 observed | Off track/stuck | 25.0 m/s^2 outside critical corners |
-| v9 | 400.10 s | 0 | Finished / then-best | 20.0 m/s^2 outside critical corners; 17 m/s cap in critical corners |
-| v10 | 398.05 s | 0 observed | Finished / then-best | Full 83 m/s straight envelope, one-tick gearbox launch, and validated 17.5 m/s^2 braking propagation |
+| v9 | 400.10 s | 0 | Finished | 20.0 m/s^2 outside critical corners; 17 m/s cap in critical corners |
+| v10 | 398.05 s | 0 observed | Finished | Full 83 m/s straight envelope, one-tick gearbox launch, and validated 17.5 m/s^2 braking propagation |
 | v11 | **327.70 s** | **0 observed** | Finished | Optimized racing line with Menger-curvature, section-specific friction, steering, and speed control |
 | v12 | **321.65 s** | **0 observed** | Finished | Reactive three-point Menger-radius speed target, section-specific friction and heading-PID gains, a 0.80 hard-brake threshold, and two fixed low-brake stability zones on one optimized path |
 | v13 | **320.35 s** | **0 observed** | Finished | Dense racing-line tracker with speed-scheduled and distance-based lookahead, multi-radius braking preview, exact 10-section state, a 24-tick Section 3 braking horizon, and localized Section 5 `distance_gain=0.24` tuning |
