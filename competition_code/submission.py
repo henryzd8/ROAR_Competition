@@ -8,6 +8,7 @@ import zlib
 from typing import List, Tuple, Dict, Optional
 import roar_py_interface
 import numpy as np
+import os
 
 # Exact public 329.95 s Monza racing line, quantized to 0.1 mm, delta encoded,
 # compressed, and embedded so the competition submission remains one file.
@@ -53,13 +54,21 @@ class RoarCompetitionSolution:
             [waypoint.location[:2] for waypoint in maneuverable_waypoints],
             dtype=np.float64,
         )
-        self.path_xy = self._decode_racing_path()
+        self.path_xy = self._scale_racing_line(
+            self._decode_racing_path(),
+            (
+                float(os.environ.get("LINE_SCALE_A", "1.0")),
+                float(os.environ.get("LINE_SCALE_B", "1.0")),
+            ),
+        )
         self.num_ticks = 0
         self.lap_start_tick = 0
         self.completed_laps = 0
         self.previous_steering_error = 0.0
         self.steering_integral = 0.0
         self.racing_line_lap = 1
+        self._tel_path = os.environ.get('TEL', '')
+        self._tlog = []
 
     def _decode_racing_path(self) -> np.ndarray:
         """Decode the exact optimized path embedded at module scope."""
@@ -73,6 +82,50 @@ class RoarCompetitionSolution:
                 f"{len(self.center_path_xy)}"
             )
         return path
+
+    def _scale_racing_line(
+        self, path: np.ndarray, scales: Tuple[float, float]
+    ) -> np.ndarray:
+        """Scale selected lateral offsets from the official centerline."""
+        if all(abs(scale - 1.0) < 1e-9 for scale in scales):
+            return path
+
+        center = self.center_path_xy
+        center_indices = np.empty(len(path), dtype=np.int64)
+        for start in range(0, len(path), 256):
+            stop = min(start + 256, len(path))
+            differences = path[start:stop, None, :] - center[None, :, :]
+            distances_squared = np.sum(differences * differences, axis=2)
+            center_indices[start:stop] = np.argmin(distances_squared, axis=1)
+
+        tangents = np.roll(center, -1, axis=0) - np.roll(center, 1, axis=0)
+        tangent_lengths = np.linalg.norm(tangents, axis=1, keepdims=True)
+        tangents /= np.maximum(tangent_lengths, 1e-9)
+        normals = np.column_stack((-tangents[:, 1], tangents[:, 0]))
+
+        offsets = path - center[center_indices]
+        along_track = np.sum(offsets * tangents[center_indices], axis=1)
+        lateral = np.sum(offsets * normals[center_indices], axis=1)
+
+        lateral_scale = np.ones(len(path), dtype=np.float64)
+        for scale, start, stop in (
+            (scales[0], 300, 1050),
+            (scales[1], 1150, 1600),
+        ):
+            ramp = 60
+            lateral_scale[start + ramp:stop - ramp] = scale
+            blend = 0.5 - 0.5 * np.cos(
+                np.pi * np.arange(1, ramp + 1) / (ramp + 1)
+            )
+            lateral_scale[start:start + ramp] = 1.0 + (scale - 1.0) * blend
+            lateral_scale[stop - ramp:stop] = (
+                1.0 + (scale - 1.0) * blend[::-1]
+            )
+        return (
+            center[center_indices]
+            + along_track[:, None] * tangents[center_indices]
+            + (lateral * lateral_scale)[:, None] * normals[center_indices]
+        )
 
     def _filter_path_index(self, location: np.ndarray, current_idx: int) -> int:
         """Match the reference controller's first forward point within 3 m."""
@@ -197,7 +250,8 @@ class RoarCompetitionSolution:
 
         waypoint_count = len(self.path_xy)
         lap_index = self.current_waypoint_idx % waypoint_count
-        lookahead = 36 if vehicle_velocity_norm * 3.6 >= 180.0 else 12
+        _la_hi = int(os.environ.get('LOOKAHEAD', '36'))
+        lookahead = _la_hi if vehicle_velocity_norm * 3.6 >= 180.0 else 12
 
         # Estimate the upcoming turn radius from three preview points.  The
         # section coefficients and controller gains are paired with this exact
@@ -269,6 +323,25 @@ class RoarCompetitionSolution:
             ) % waypoint_count
             target_point = np.mean(self.path_xy[target_indices], axis=0)
 
+        lateral_mode = os.environ.get("LATERAL_MODE", "PID")
+        if lateral_mode == "PURE_PURSUIT":
+            pursuit_distance = (
+                float(os.environ.get("PP_BASE", "8.0"))
+                + float(os.environ.get("PP_SPEED", "0.35"))
+                * vehicle_velocity_norm
+            )
+            target_index = lap_index
+            traveled = 0.0
+            for _ in range(120):
+                next_index = (target_index + 1) % waypoint_count
+                traveled += np.linalg.norm(
+                    self.path_xy[next_index] - self.path_xy[target_index]
+                )
+                target_index = next_index
+                if traveled >= pursuit_distance:
+                    break
+            target_point = self.path_xy[target_index]
+
         vector_to_waypoint = target_point - vehicle_location[:2]
         heading_to_waypoint = np.arctan2(
             vector_to_waypoint[1], vector_to_waypoint[0]
@@ -276,44 +349,55 @@ class RoarCompetitionSolution:
         delta_heading = normalize_rad(
             heading_to_waypoint - vehicle_rotation[2]
         )
-        steering_error = delta_heading / np.pi
-        steering_derivative = (
-            steering_error - self.previous_steering_error
-        )
-        self.steering_integral += steering_error
-
-        proportional_gain = 5.9
-        derivative_gain = 5.0
-        if 570 < lap_index < 780:
-            proportional_gain = 4.25
-        if 1600 < lap_index < 2300:
-            proportional_gain = 8.5
-            derivative_gain = 8.4
-        elif lap_index >= 2600:
-            proportional_gain = 2.6
-            derivative_gain = 8.0
-        steering_command = (
-            proportional_gain * steering_error
-            + 0.1 * self.steering_integral
-            + derivative_gain * steering_derivative
-        )
-        self.previous_steering_error = steering_error
-        if vehicle_velocity_norm > 1e-2:
-            steer_control = (
-                -8.0 / np.sqrt(vehicle_velocity_norm) * steering_command
+        if lateral_mode == "PURE_PURSUIT":
+            wheelbase = 3.0
+            maximum_steering_angle = np.deg2rad(70.0)
+            steering_angle = np.arctan2(
+                2.0 * wheelbase * np.sin(delta_heading),
+                max(np.linalg.norm(vector_to_waypoint), 1.0),
+            )
+            steer_control = -float(os.environ.get("PP_GAIN", "1.0")) * (
+                steering_angle / maximum_steering_angle
             )
         else:
-            steer_control = -np.sign(steering_command)
+            steering_error = delta_heading / np.pi
+            steering_derivative = (
+                steering_error - self.previous_steering_error
+            )
+            self.steering_integral += steering_error
+
+            proportional_gain = 5.9
+            derivative_gain = 5.0
+            if 570 < lap_index < 780:
+                proportional_gain = 4.25
+            if 1600 < lap_index < 2300:
+                proportional_gain = 8.5
+                derivative_gain = 8.4
+            elif lap_index >= 2600:
+                proportional_gain = 2.6
+                derivative_gain = 8.0
+            steering_command = (
+                proportional_gain * steering_error
+                + 0.1 * self.steering_integral
+                + derivative_gain * steering_derivative
+            )
+            self.previous_steering_error = steering_error
+            if vehicle_velocity_norm > 1e-2:
+                steer_control = (
+                    -8.0 / np.sqrt(vehicle_velocity_norm) * steering_command
+                )
+            else:
+                steer_control = -np.sign(steering_command)
         steer_control = np.clip(steer_control, -1.0, 1.0)
 
-        if target_velocity < 0.75 * vehicle_velocity_norm:
+        if target_velocity < 0.80 * vehicle_velocity_norm:
             longitudinal_command = -1.0
         else:
             longitudinal_command = 200.0 * (
                 target_velocity - vehicle_velocity_norm
             )
         if 1291 < lap_index < 1345:
-            longitudinal_command = -0.10
+            longitudinal_command = -0.09
         if 2635 < lap_index < 2700:
             longitudinal_command = -0.05
         if lap_index < 30:
@@ -330,4 +414,13 @@ class RoarCompetitionSolution:
             "target_gear": max(1, int((vehicle_velocity_norm * 3.6) / 60.0))
         }
         await self.vehicle.apply_action(control)
+        if self._tel_path:
+            self._tlog.append([
+                self.num_ticks, lap_index, vehicle_velocity_norm,
+                float(target_velocity), float(throttle_control),
+                float(brake_control), float(steer_control),
+                vehicle_location[0], vehicle_location[1],
+            ])
+            if self.num_ticks % 50 == 0:
+                np.save(self._tel_path, np.array(self._tlog))
         return control
