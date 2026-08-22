@@ -50,6 +50,9 @@ class RoarCompetitionSolution:
         self.waypoint_spacing = 2.0
         self.target_speeds = self._build_speed_profile()
         self.previous_steer = 0.0
+        self.num_ticks = 0
+        self.lap_start_tick = 0
+        self.completed_laps = 0
 
     def _build_speed_profile(self) -> np.ndarray:
         """Build a cyclic center-line speed profile from path curvature."""
@@ -86,7 +89,10 @@ class RoarCompetitionSolution:
         speed_profile = np.sqrt(
             lateral_acceleration_limit / np.maximum(curvature, 1e-4)
         )
-        speed_profile = np.clip(speed_profile, 17.0, 70.0)
+        # The v9 profile left the Model 3 artificially capped at 252 km/h on
+        # Monza's long straights.  Public fast solutions allow the car to use
+        # its full ~300 km/h envelope while retaining explicit corner limits.
+        speed_profile = np.clip(speed_profile, 17.0, 83.0)
 
         # The two tight Monza chicanes define the stability boundary.  Keep
         # them at the proven-safe v4 speed while allowing faster medium turns.
@@ -97,7 +103,9 @@ class RoarCompetitionSolution:
 
         # Propagate each corner's limit backwards using the braking equation.
         segment_lengths = np.linalg.norm(np.roll(path, -1, axis=0) - path, axis=1)
-        maximum_deceleration = 16.0
+        # This is the fastest value that completed all three validation laps;
+        # higher global values approached the late-braking stability boundary.
+        maximum_deceleration = 17.5
         for _ in range(4):
             for index in range(waypoint_count - 1, -1, -1):
                 next_index = (index + 1) % waypoint_count
@@ -130,6 +138,23 @@ class RoarCompetitionSolution:
         """
         # TODO: Implement your solution here.
 
+        self.num_ticks += 1
+
+        # CARLA's automatic gearbox can spend roughly a second engaging from a
+        # standing start.  A one-tick reverse request followed immediately by
+        # normal forward control forces prompt gear engagement.
+        if self.num_ticks == 1:
+            control = {
+                "throttle": 1.0,
+                "steer": 0.0,
+                "brake": 0.0,
+                "hand_brake": 0.0,
+                "reverse": 1,
+                "target_gear": 1,
+            }
+            await self.vehicle.apply_action(control)
+            return control
+
         # Receive location, rotation and velocity data 
         vehicle_location = self.location_sensor.get_last_gym_observation()
         vehicle_rotation = self.rpy_sensor.get_last_gym_observation()
@@ -137,11 +162,21 @@ class RoarCompetitionSolution:
         vehicle_velocity_norm = np.linalg.norm(vehicle_velocity)
         
         # Find the waypoint closest to the vehicle without jumping backwards.
+        previous_waypoint_idx = self.current_waypoint_idx
         self.current_waypoint_idx = filter_waypoints(
             vehicle_location,
             self.current_waypoint_idx,
             self.maneuverable_waypoints
         )
+
+        # Lightweight in-console telemetry; no benchmark files are created.
+        if self.current_waypoint_idx + len(self.maneuverable_waypoints) // 2 < previous_waypoint_idx:
+            self.completed_laps += 1
+            print(
+                f"controller lap {self.completed_laps}: "
+                f"{(self.num_ticks - self.lap_start_tick) * 0.05:.2f} s"
+            )
+            self.lap_start_tick = self.num_ticks
 
         # Increase geometric lookahead with speed for stable high-speed tracking.
         lookahead_metres = np.clip(7.0 + 0.50 * vehicle_velocity_norm, 8.0, 30.0)
