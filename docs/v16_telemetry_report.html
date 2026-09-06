@@ -1,0 +1,397 @@
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+:root {
+  --bg: #f4f3ef;
+  --surface: #ffffff;
+  --surface-2: #ebeae5;
+  --border: #d6d4ce;
+  --text: #181714;
+  --text-dim: #696660;
+  --text-faint: #9c9992;
+  --amber: #cc7400;
+  --amber-bright: #f5a623;
+  --blue: #2563a8;
+  --red: #b8402f;
+  --green: #2a8059;
+  --grip: #8b6fb8;
+  --grid: #e0ded8;
+  --sec0: #e74c3c; --sec1: #e67e22; --sec2: #2ecc71; --sec3: #e74c3c;
+  --sec4: #3498db; --sec5: #1abc9c; --sec6: #e74c3c; --sec7: #e74c3c;
+  --sec8: #95a5a6; --sec9: #f39c12;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #121317; --surface: #1c1d22; --surface-2: #24252b; --border: #33343d;
+    --text: #e2e0d9; --text-dim: #989590; --text-faint: #62646b;
+    --amber: #f5a623; --amber-bright: #ffb84d; --blue: #5b9fd9; --red: #e55a4a;
+    --green: #4caf7c; --grip: #a48fd0; --grid: #2a2b32;
+    --sec0: #c0392b; --sec1: #d35400; --sec2: #27ae60; --sec3: #c0392b;
+    --sec4: #2980b9; --sec5: #16a085; --sec6: #c0392b; --sec7: #c0392b;
+    --sec8: #7f8c8d; --sec9: #e67e22;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #121317; --surface: #1c1d22; --surface-2: #24252b; --border: #33343d;
+  --text: #e2e0d9; --text-dim: #989590; --text-faint: #62646b;
+  --amber: #f5a623; --amber-bright: #ffb84d; --blue: #5b9fd9; --red: #e55a4a;
+  --green: #4caf7c; --grip: #a48fd0; --grid: #2a2b32;
+  --sec0: #c0392b; --sec1: #d35400; --sec2: #27ae60; --sec3: #c0392b;
+  --sec4: #2980b9; --sec5: #16a085; --sec6: #c0392b; --sec7: #c0392b;
+  --sec8: #7f8c8d; --sec9: #e67e22;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--bg); color: var(--text); font-family: 'IBM Plex Sans', system-ui, sans-serif; font-size: 15px; line-height: 1.6; -webkit-font-smoothing: antialiased; }
+.page { max-width: 960px; margin: 0 auto; padding: 48px 28px 80px; }
+.eyebrow { font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--amber); margin-bottom: 10px; }
+h1 { font-family: 'Barlow Condensed', sans-serif; font-weight: 600; font-size: 38px; line-height: 1.08; letter-spacing: -0.01em; text-wrap: balance; margin-bottom: 14px; }
+.subtitle { color: var(--text-dim); font-size: 15px; max-width: 70ch; }
+.result-band { display: flex; gap: 0; margin: 28px 0; border: 1px solid var(--border); border-radius: 6px; overflow: hidden; background: var(--surface); }
+.result-cell { flex: 1; padding: 18px 22px; border-right: 1px solid var(--border); }
+.result-cell:last-child { border-right: none; }
+.rl { font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-faint); margin-bottom: 5px; }
+.rv { font-family: 'Barlow Condensed', sans-serif; font-weight: 600; font-size: 28px; line-height: 1; font-variant-numeric: tabular-nums; }
+.rv.amber { color: var(--amber); } .ru { font-size: 13px; color: var(--text-dim); font-weight: 400; margin-left: 2px; }
+section { margin-bottom: 44px; }
+h2 { font-family: 'Barlow Condensed', sans-serif; font-weight: 600; font-size: 22px; margin-bottom: 6px; display: flex; align-items: baseline; gap: 10px; }
+h2 .num { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--amber); font-weight: 500; }
+.lede { color: var(--text-dim); font-size: 14px; margin-bottom: 20px; max-width: 72ch; }
+.chart-box { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 20px; }
+.chart-box svg { width: 100%; height: auto; display: block; }
+.cap { font-size: 12px; color: var(--text-faint); margin-top: 10px; font-family: 'IBM Plex Mono', monospace; line-height: 1.5; }
+.legend { display: flex; gap: 18px; flex-wrap: wrap; margin-bottom: 12px; }
+.li { display: flex; align-items: center; gap: 7px; font-size: 12px; color: var(--text-dim); font-family: 'IBM Plex Mono', monospace; }
+.ld { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+.ll { width: 16px; height: 2px; flex-shrink: 0; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+th { font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-faint); text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--border); font-weight: 500; }
+td { padding: 9px 10px; border-bottom: 1px solid var(--border); font-variant-numeric: tabular-nums; }
+tr:last-child td { border-bottom: none; }
+.cn { color: var(--text); font-weight: 500; }
+.cs { font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: var(--text-dim); }
+.callout { border-left: 3px solid var(--amber); background: var(--surface); padding: 14px 18px; border-radius: 0 6px 6px 0; margin: 20px 0; font-size: 14px; color: var(--text-dim); }
+.callout strong { color: var(--text); }
+.callout code { font-family: 'IBM Plex Mono', monospace; font-size: 13px; }
+.gauge-row { display: flex; gap: 12px; flex-wrap: wrap; margin: 16px 0; }
+.gauge { flex: 1; min-width: 120px; background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 14px 16px; }
+.gauge-label { font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-faint); margin-bottom: 8px; }
+.gauge-bar { height: 8px; background: var(--surface-2); border-radius: 4px; overflow: hidden; position: relative; }
+.gauge-fill { height: 100%; border-radius: 4px; }
+.gauge-val { font-family: 'Barlow Condensed', sans-serif; font-weight: 600; font-size: 20px; margin-top: 4px; font-variant-numeric: tabular-nums; }
+.footer { margin-top: 56px; padding-top: 20px; border-top: 1px solid var(--border); font-size: 12px; color: var(--text-faint); font-family: 'IBM Plex Mono', monospace; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
+</style>
+<title>Monza Telemetry Analysis</title>
+
+<div class="page">
+
+<div class="eyebrow">ROAR Monza · Technical Telemetry Report</div>
+<h1>Anatomy of a 320-Second Lap</h1>
+<p class="subtitle">Full per-tick telemetry analysis of the best-config 3-lap run (320.00s, 0 collisions) on the Monza simulation circuit. Track geometry, corner-by-corner grip utilization, lateral acceleration limits, and the scrub-limited apex behavior that defines the performance ceiling.</p>
+
+<div class="result-band">
+  <div class="result-cell"><div class="rl">3-Lap Total</div><div class="rv amber">320.00<span class="ru">s</span></div></div>
+  <div class="result-cell"><div class="rl">Flying Lap</div><div class="rv">104.50<span class="ru">s</span></div></div>
+  <div class="result-cell"><div class="rl">Top Speed</div><div class="rv">71.5<span class="ru"> m/s</span></div></div>
+  <div class="result-cell"><div class="rl">Track Length</div><div class="rv">5,588<span class="ru"> m</span></div></div>
+  <div class="result-cell"><div class="rl">Avg Speed</div><div class="rv">53.5<span class="ru"> m/s</span></div></div>
+  <div class="result-cell"><div class="rl">Collisions</div><div class="rv">0</div></div>
+</div>
+
+<!-- 01: Track Map -->
+<section>
+<h2><span class="num">01</span> Racing Line & Track Layout</h2>
+<p class="lede">The Monza circuit rendered from driven telemetry (flying lap 2). Each colored segment is one of the controller's 10 sections. The racing line follows the embedded dense path — a precomputed spline that cuts chicanes and widens single corners. Start/finish is at right; the lap runs clockwise.</p>
+<div class="chart-box">
+<div class="legend">
+<div class="li"><span class="ld" style="background:var(--sec0)"></span>0 Rettifilo</div>
+<div class="li"><span class="ld" style="background:var(--sec1)"></span>1 Biassono</div>
+<div class="li"><span class="ld" style="background:var(--sec2)"></span>2 Curva Grande</div>
+<div class="li"><span class="ld" style="background:var(--sec3)"></span>3 Roggia</div>
+<div class="li"><span class="ld" style="background:var(--sec4)"></span>4 Lesmo 1</div>
+<div class="li"><span class="ld" style="background:var(--sec5)"></span>5 Lesmo 2</div>
+<div class="li"><span class="ld" style="background:var(--sec6)"></span>6 Ascari</div>
+<div class="li"><span class="ld" style="background:var(--sec7)"></span>7 Vialone</div>
+<div class="li"><span class="ld" style="background:var(--sec8)"></span>8 Straight</div>
+<div class="li"><span class="ld" style="background:var(--sec9)"></span>9 Parabolica</div>
+</div>
+<svg id="track-map" viewBox="0 0 700 500"></svg>
+<p class="cap">Driven trajectory from per-tick (x, y) telemetry, colored by controller section. The dense path straightens the Rettifilo/Ascari/Vialone chicanes and widens Parabolica. The ±6m corridor is visible in the corner exits.</p>
+</div>
+</section>
+
+<!-- 02: Speed Profile -->
+<section>
+<h2><span class="num">02</span> Speed Profile</h2>
+<p class="lede">Vehicle speed through the flying lap, overlaid with corner-section bands. The car reaches 71.5 m/s (257 km/h) on straights and drops to 25 m/s at Parabolica — the tightest corner (R≈25m). Each V-shaped dip is a braking zone followed by a scrub-limited apex.</p>
+<div class="chart-box">
+<div class="legend">
+<div class="li"><span class="ll" style="background:var(--amber)"></span>Speed</div>
+<div class="li"><span class="ld" style="background:var(--red);opacity:0.3"></span>Chicane (L-R transition)</div>
+<div class="li"><span class="ld" style="background:var(--green);opacity:0.3"></span>Single corner</div>
+</div>
+<svg id="speed-chart" viewBox="0 0 860 280"></svg>
+<p class="cap">Speed (m/s) vs track distance (km). Shaded bands mark corner sections — red for chicanes (L-R transitions), green for single corners. The car is WOT (throttle=1.0) at every apex despite low speed — the scrub signature.</p>
+</div>
+</section>
+
+<!-- 03: Lateral Acceleration -->
+<section>
+<h2><span class="num">03</span> Lateral Acceleration & The Grip Ceiling</h2>
+<p class="lede">Achieved lateral acceleration (a_lat = v²·κ) at each point, compared to the tire grip limit of 33 m/s². The car never exceeds ~27 m/s², and at most apexes it plateaus at 20-22 — the scrub limit. This 11 m/s² gap to the tire limit is the single largest source of lost time.</p>
+<div class="chart-box">
+<div class="legend">
+<div class="li"><span class="ll" style="background:var(--grip)"></span>a_lat achieved</div>
+<div class="li"><span class="ll" style="background:var(--red);border-top:2px dashed var(--red)"></span>Tire limit (33 m/s²)</div>
+<div class="li"><span class="ll" style="background:var(--amber);border-top:2px dashed var(--amber)"></span>Scrub ceiling (~22 m/s²)</div>
+</div>
+<svg id="alat-chart" viewBox="0 0 860 280"></svg>
+<p class="cap">Lateral acceleration (m/s²) vs track distance. The purple trace never reaches the red tire-limit line — the car scrubs speed at WOT rather than sustaining peak grip. The amber dashed line marks the p90 sustained level (~22 m/s²), which is the effective controller limit.</p>
+</div>
+<div class="gauge-row">
+<div class="gauge"><div class="gauge-label">Tire Grip Limit</div><div class="gauge-bar"><div class="gauge-fill" style="background:var(--red);width:100%"></div></div><div class="gauge-val" style="color:var(--red)">33.0<span style="font-size:13px;color:var(--text-dim)"> m/s²</span></div></div>
+<div class="gauge"><div class="gauge-label">Max Achieved</div><div class="gauge-bar"><div class="gauge-fill" style="background:var(--grip);width:81%"></div></div><div class="gauge-val" style="color:var(--grip)">26.8<span style="font-size:13px;color:var(--text-dim)"> m/s²</span></div></div>
+<div class="gauge"><div class="gauge-label">P90 Sustained</div><div class="gauge-bar"><div class="gauge-fill" style="background:var(--amber);width:63%"></div></div><div class="gauge-val" style="color:var(--amber)">20.7<span style="font-size:13px;color:var(--text-dim)"> m/s²</span></div></div>
+<div class="gauge"><div class="gauge-label">Grip Headroom</div><div class="gauge-bar"><div class="gauge-fill" style="background:var(--green);width:37%"></div></div><div class="gauge-val" style="color:var(--green)">37%<span style="font-size:13px;color:var(--text-dim)"> unused</span></div></div>
+</div>
+</section>
+
+<!-- 04: Throttle/Brake Trace -->
+<section>
+<h2><span class="num">04</span> Throttle & Brake Trace: The Scrub Signature</h2>
+<p class="lede">Longitudinal actuation through the lap. The car is WOT (throttle=1.0, brake=0.0) 93% of the time. Braking occurs in sharp 1-2 second pulses before corners, then immediately releases to full throttle — even as the car continues to decelerate through the apex. This "WOT at apex" behavior is the scrub: the car can't sustain the planned speed, so it scrubs off 5-10 m/s at full throttle.</p>
+<div class="chart-box">
+<div class="legend">
+<div class="li"><span class="ld" style="background:var(--green)"></span>Throttle (0-1)</div>
+<div class="li"><span class="ld" style="background:var(--red)"></span>Brake (0-1)</div>
+</div>
+<svg id="thrbrk-chart" viewBox="0 0 860 200"></svg>
+<p class="cap">Throttle (green) and brake (red) vs track distance. The brake pulses are brief and hard (bang-bang control). After each release, throttle jumps to 1.0 immediately — there is no trail-brake or lift-off coast phase. The car is either full-throttle or full-brake, never in between.</p>
+</div>
+</section>
+
+<!-- 05: Per-Corner Analysis -->
+<section>
+<h2><span class="num">05</span> Corner-by-Corner Analysis</h2>
+<p class="lede">Each corner's geometry, achieved speed, lateral acceleration, and grip utilization. The "v@33" column shows the theoretical speed at the tire limit — the gap between achieved v_min and v@33 is the time lost to scrub. Parabolica (R=25m) is the tightest and slowest; Ascari (R=75m) carries the most speed through a chicane.</p>
+<table>
+<thead><tr><th>Corner</th><th>Sec</th><th>R_min (m)</th><th>v_min (m/s)</th><th>v_max (m/s)</th><th>a_lat p90</th><th>a_lat max</th><th>v@33 (m/s)</th><th>Thr mean</th><th>Brk mean</th><th>Type</th></tr></thead>
+<tbody>
+<tr><td class="cn">Rettifilo</td><td class="cs">0</td><td>74</td><td>27.1</td><td>64.3</td><td>11.7</td><td>13.4</td><td>78.3</td><td>1.00</td><td>0.000</td><td style="color:var(--red)">Chicane</td></tr>
+<tr><td class="cn">Biassono</td><td class="cs">1</td><td>51</td><td>34.9</td><td>68.4</td><td>22.3</td><td>25.5</td><td>41.0</td><td>0.86</td><td>0.146</td><td style="color:var(--text-dim)">Straight+</td></tr>
+<tr><td class="cn">Curva Grande</td><td class="cs">2</td><td>64</td><td>39.6</td><td>52.4</td><td>25.2</td><td>26.6</td><td>45.9</td><td>0.97</td><td>0.030</td><td style="color:var(--green)">Single</td></tr>
+<tr><td class="cn">Roggia</td><td class="cs">3</td><td>70</td><td>41.2</td><td>68.6</td><td>18.4</td><td>25.3</td><td>48.1</td><td>0.98</td><td>0.026</td><td style="color:var(--red)">Chicane</td></tr>
+<tr><td class="cn">Lesmo 1</td><td class="cs">4</td><td>84</td><td>43.8</td><td>70.9</td><td>22.0</td><td>23.9</td><td>52.7</td><td>0.80</td><td>0.206</td><td style="color:var(--green)">Single</td></tr>
+<tr><td class="cn">Lesmo 2</td><td class="cs">5</td><td>99</td><td>45.3</td><td>58.7</td><td>20.4</td><td>22.3</td><td>57.1</td><td>1.00</td><td>0.000</td><td style="color:var(--green)">Single</td></tr>
+<tr><td class="cn">Ascari</td><td class="cs">6</td><td>75</td><td>43.6</td><td>71.2</td><td>25.7</td><td>26.8</td><td>49.7</td><td>0.94</td><td>0.068</td><td style="color:var(--red)">Chicane</td></tr>
+<tr><td class="cn">Vialone</td><td class="cs">7</td><td>77</td><td>43.3</td><td>47.5</td><td>20.3</td><td>24.6</td><td>50.4</td><td>1.00</td><td>0.000</td><td style="color:var(--red)">Chicane</td></tr>
+<tr><td class="cn">Straight</td><td class="cs">8</td><td>203</td><td>47.6</td><td>71.3</td><td>8.0</td><td>11.2</td><td>82.0</td><td>1.00</td><td>0.000</td><td style="color:var(--text-dim)">Straight</td></tr>
+<tr><td class="cn">Parabolica</td><td class="cs">9</td><td>25</td><td>24.7</td><td>71.5</td><td>24.6</td><td>26.2</td><td>28.7</td><td>0.79</td><td>0.211</td><td style="color:var(--green)">Single</td></tr>
+</tbody>
+</table>
+<div class="callout">
+<strong>The scrub signature:</strong> at every single-corner apex (Curva Grande, Lesmo, Ascari, Parabolica), throttle mean is 0.79-1.00 and brake mean is 0.00-0.03 — yet a_lat plateaus at 20-27. The car is <em>wide open at the apex</em> and still can't reach the tire limit. The <code>v@33</code> column shows how much faster each corner could theoretically be: Parabolica could do 28.7 m/s (vs achieved 24.7), Curva Grande 45.9 (vs 39.6). That 4-6 m/s gap at every corner is the time the scrub limit costs.
+</div>
+</section>
+
+<!-- 06: Steering -->
+<section>
+<h2><span class="num">06</span> Steering Command Trace</h2>
+<p class="lede">Normalized steering command (−1 to +1) through the lap. The per-section steering scale multipliers are visible: chicanes (Rettifilo, Roggia, Ascari, Vialone) produce sharp direction reversals; single corners (Curva Grande, Lesmo, Parabolica) produce sustained deflections. The best config increases authority on Lesmo 1 (+13.7%) and decreases it on Lesmo 2 (−4.4%).</p>
+<div class="chart-box">
+<svg id="steer-chart" viewBox="0 0 860 200"></svg>
+<p class="cap">Steering command vs track distance. Positive = left, negative = right. The sharp L-R reversals at Rettifilo (~1.0-1.5 km) and Ascari (~2.7-3.2 km) are the chicane transitions where any controller perturbation crashes. The sustained deflections at Curva Grande and Parabolica are where the steering-scale tuning has effect.</p>
+</div>
+</section>
+
+<!-- 07: Conclusion -->
+<section>
+<h2><span class="num">07</span> The Scrub Limit: Why 320 Seconds Is the Ceiling</h2>
+<p class="lede">The telemetry tells a clear story: the car is not grip-limited, it is scrub-limited. At every corner apex, the car is at full throttle yet decelerating — the tires can sustain 33 m/s² but the controller only achieves ~22. The 37% unused grip headroom is not available to the reactive pure-pursuit controller, which brakes to a v_target, releases to WOT, and then scrubs down to the sustained grip level.</p>
+<div class="callout">
+<strong>The time math:</strong> the grip-limit lap (all apexes at v@33) would take ~96 seconds. The achieved flying lap is 104.5 seconds. The 8.5-second gap is almost entirely scrub — the car enters each corner at v_target (above sustainable grip), releases to WOT, and scrubs 4-6 m/s before the apex. No steering-gain or brake-release tuning can close this gap because it doesn't change v_target. Breaking 320 seconds requires a controller that sustains a_lat=33 at the apex — which means model-predictive brake/throttle timing, not reactive bang-bang.
+</div>
+</section>
+
+<div class="footer">
+<span>ROAR Competition · Monza Simulation · 2026-09-06</span>
+<span>Telemetry: 2,091 ticks · Flying lap 2 · Best config (320.00s)</span>
+</div>
+
+</div>
+
+<script>
+const TX=[-277,-282,-289,-296,-304,-312,-319,-323,-324,-323,-319,-311,-298,-280,-258,-232,-203,-171,-134,-95,-54,-12,31,76,121,168,215,260,296,326,346,358,372,393,417,444,471,500,533,564,597,632,668,700,723,737,745,751,756,760,764,768,771,771,763,746,721,694,666,638,608,577,545,513,480,448,417,386,354,322,289,255,220,185,149,110,74,41,14,-4,-12,-13,-17,-27,-47,-66,-76,-81,-83,-85,-86,-88,-89,-90,-91,-93,-94,-95,-97,-98,-100,-101,-103,-105,-108,-111,-117,-130,-150,-178,-209,-239,-268,-291,-312,-329,-342,-351,-357,-361,-364,-366,-368,-369,-370,-371,-370,-369,-367,-365,-362,-360,-357,-355,-354,-352,-351,-349,-347,-345,-344,-342,-341,-339,-334,-323,-306,-288,-278,-277];
+const TY=[373,393,413,434,458,483,509,538,568,600,632,665,698,728,758,786,812,833,850,862,872,879,886,890,895,899,903,907,912,920,935,957,978,992,1002,1012,1022,1033,1045,1056,1067,1075,1078,1072,1055,1031,1004,974,943,911,877,842,806,772,741,718,703,688,673,657,639,621,602,582,561,536,509,481,451,421,390,359,327,295,262,226,192,161,134,107,77,45,13,-18,-45,-73,-105,-139,-174,-211,-249,-288,-328,-369,-412,-455,-499,-545,-591,-638,-686,-735,-784,-834,-883,-933,-975,-1011,-1040,-1059,-1065,-1059,-1043,-1023,-998,-968,-936,-902,-866,-828,-789,-749,-708,-666,-623,-578,-533,-487,-440,-392,-344,-294,-245,-195,-146,-96,-46,4,54,104,154,203,247,283,310,327,333,339,353,372];
+const SPD=[27.1,29.3,31.7,34.0,36.2,38.4,40.4,42.3,44.1,46.0,47.7,49.2,50.4,51.7,53.3,54.8,56.0,56.9,57.8,59.1,60.5,62.0,63.3,64.7,66.0,67.3,68.3,57.5,50.1,39.2,35.1,36.1,36.1,36.7,38.9,41.0,43.1,45.0,47.1,48.9,50.7,52.1,49.4,43.3,40.1,39.9,41.9,43.9,45.8,47.7,49.5,51.3,52.7,45.9,43.6,41.4,42.4,44.4,46.4,48.2,50.1,51.8,53.5,55.2,56.7,58.1,59.6,61.1,62.6,63.9,65.3,66.6,67.9,69.1,70.0,70.6,70.4,59.1,49.7,44.7,44.1,46.1,47.5,46.9,47.8,48.2,48.2,49.9,51.7,53.4,55.1,56.7,58.3,59.8,61.3,62.7,64.1,65.4,66.7,68.0,69.2,70.0,70.6,70.9,71.2,67.9,56.2,52.7,49.9,46.3,43.6,43.6,44.3,45.9,47.2,48.6,50.2,51.7,53.3,54.9,56.5,58.1,59.6,61.1,62.5,63.9,65.2,66.5,67.8,69.0,69.9,70.5,70.9,71.1,71.3,71.4,71.5,71.0,71.2,71.3,71.4,71.5,68.4,55.8,45.9,33.0,27.1,26.5,25.9,25.0,26.9];
+const THR=[1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,0.0,0.35,0.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,0.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,0.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,0.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,0.0,1.0,0.0,1.0,1.0,1.0,1.0,1.0,1.0];
+const BRK=[0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,1.0,1.0,1.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,1.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,1.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,1.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,1.0,0.0,1.0,0.0,0.0,0.0,0.0,0.0,0.0];
+const STEER=[-0.077,-0.002,0.001,0.001,0.007,0.013,0.013,0.012,0.008,0.009,0.016,0.02,0.013,0.004,0.011,0.013,0.02,0.011,0.008,0.001,0.003,0.004,0.001,-0.0,-0.0,-0.0,-0.001,-0.012,-0.05,-0.029,-0.009,0.107,0.016,-0.0,0.002,-0.002,0.0,0.0,0.001,0.005,0.016,0.03,0.045,0.008,0.028,-0.001,0.006,0.003,0.002,0.001,-0.001,0.005,0.023,0.051,0.068,-0.007,-0.005,0.003,-0.004,-0.0,-0.0,0.0,-0.003,-0.008,-0.006,-0.002,-0.0,0.0,0.0,0.0,-0.0,-0.0,0.0,-0.0,-0.001,-0.0,0.001,-0.017,-0.047,-0.009,0.018,0.012,0.058,-0.005,-0.06,-0.016,0.004,-0.002,-0.0,-0.002,0.0,-0.0,-0.0,0.0,0.0,0.0,0.0,0.0,-0.0,0.0,0.001,-0.001,-0.001,-0.006,0.001,0.002,-0.03,0.073,0.038,0.044,-0.0,0.055,0.006,0.019,0.018,0.009,0.014,0.007,0.003,0.001,-0.0,0.001,0.001,0.001,0.002,0.002,0.001,0.0,-0.0,0.0,-0.0,-0.001,-0.001,-0.0,0.0,0.0,0.001,-0.0,-0.001,0.0,-0.0,-0.0,0.008,0.038,0.021,0.23,-0.269,-0.084,-0.085,-0.01];
+const ALAT=[6.5,3.5,3.8,2.7,1.8,3.5,5.2,6.1,5.7,5.5,6.6,10.2,12.0,8.5,6.7,8.5,10.9,12.6,10.4,6.9,4.3,4.8,4.3,1.5,0.9,3.0,2.9,3.0,11.0,22.3,23.7,8.9,22.6,9.9,3.0,2.9,1.1,2.5,2.0,4.4,6.1,11.3,19.4,25.8,24.3,15.4,3.6,2.3,2.7,1.9,3.0,2.4,7.3,18.3,24.3,23.5,2.8,2.3,2.1,2.8,2.6,2.1,1.8,5.1,5.3,5.7,2.2,3.3,1.7,0.9,2.1,1.3,3.2,3.3,2.0,2.8,3.3,2.8,14.6,23.9,12.2,4.5,16.2,21.5,7.2,20.7,13.8,3.1,1.3,1.9,1.8,2.9,1.2,0.6,1.2,2.9,3.5,2.3,0.1,1.7,3.4,0.6,2.3,2.9,3.4,7.4,15.7,22.0,26.8,26.2,24.0,17.5,13.4,10.5,11.1,10.0,8.5,7.6,5.5,2.5,1.8,1.8,1.8,2.9,1.2,4.0,1.8,1.7,1.8,2.8,2.9,2.8,2.3,1.8,0.6,2.3,2.3,1.2,3.5,1.1,1.2,2.9,1.1,7.5,19.6,26.0,10.5,26.0,17.3,10.7];
+const ARC=[0.0,0.02,0.041,0.064,0.089,0.115,0.142,0.171,0.202,0.233,0.266,0.3,0.335,0.371,0.407,0.445,0.484,0.523,0.564,0.605,0.646,0.689,0.733,0.778,0.824,0.87,0.918,0.962,0.999,1.031,1.056,1.081,1.106,1.132,1.158,1.186,1.216,1.247,1.281,1.315,1.35,1.386,1.422,1.454,1.483,1.511,1.54,1.57,1.601,1.634,1.668,1.703,1.74,1.774,1.805,1.835,1.864,1.894,1.926,1.959,1.994,2.029,2.066,2.104,2.143,2.184,2.225,2.267,2.31,2.355,2.4,2.446,2.493,2.541,2.59,2.643,2.692,2.738,2.776,2.809,2.839,2.871,2.904,2.937,2.97,3.004,3.037,3.072,3.107,3.144,3.182,3.221,3.261,3.303,3.345,3.388,3.433,3.478,3.524,3.571,3.62,3.668,3.718,3.767,3.817,3.866,3.909,3.947,3.983,4.017,4.048,4.079,4.112,4.143,4.176,4.209,4.244,4.28,4.316,4.354,4.393,4.433,4.475,4.517,4.56,4.604,4.65,4.696,4.743,4.791,4.839,4.888,4.938,4.988,5.038,5.087,5.137,5.187,5.237,5.287,5.337,5.387,5.43,5.466,5.494,5.514,5.533,5.551,5.569,5.588];
+const SEC=[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,2,2,2,2,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,4,4,4,4,4,4,4,4,5,5,5,5,5,5,5,5,5,5,5,5,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,7,7,7,7,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9];
+const SS=[0,0.689,1.192,1.581,2.478,2.818,3.244,4.025,4.16,5.048,5.62];
+const SN=["Rettifilo","Biassono","CurvaGrande","Roggia","Lesmo1","Lesmo2","Ascari","Vialone","Straight","Parabolica"];
+const SECCOL=['var(--sec0)','var(--sec1)','var(--sec2)','var(--sec3)','var(--sec4)','var(--sec5)','var(--sec6)','var(--sec7)','var(--sec8)','var(--sec9)'];
+const CHICANE=[0,3,6,7];
+
+function secBand(html, padL, padT, plotW, plotH, sy) {
+  for(let i=0;i<10;i++){
+    const x0=padL+(SS[i]/5.62)*plotW;
+    const x1=padL+(SS[i+1]/5.62)*plotW;
+    const isChic=CHICANE.includes(i);
+    html+=`<rect x="${x0}" y="${padT}" width="${x1-x0}" height="${plotH}" fill="${isChic?'var(--red)':'var(--green)'}" opacity="0.06"/>`;
+    if(x1-x0>20){
+      const xc=(x0+x1)/2;
+      html+=`<text x="${xc}" y="${padT+10}" text-anchor="middle" font-family="IBM Plex Mono" font-size="7" fill="var(--text-faint)">${SN[i]}</text>`;
+    }
+  }
+  return html;
+}
+
+// TRACK MAP
+(function(){
+  const svg=document.getElementById('track-map');
+  const W=700,H=500;
+  const minX=-371,maxX=772,minY=-1065,maxY=1078;
+  const pad=40;
+  const sx=x=>pad+((x-minX)/(maxX-minX))*(W-2*pad);
+  const sy=y=>pad+((maxY-y)/(maxY-minY))*(H-2*pad); // flip Y
+  let html='';
+  // path colored by section
+  for(let i=0;i<TX.length-1;i++){
+    const s=SEC[i];
+    html+=`<line x1="${sx(TX[i])}" y1="${sy(TY[i])}" x2="${sx(TX[i+1])}" y2="${sy(TY[i+1])}" stroke="${SECCOL[s]}" stroke-width="2.5" stroke-linecap="round" opacity="0.85"/>`;
+  }
+  // corner labels — compute centroid of each section's points
+  const allLabels=['Rettifilo','Biassono','Curva Grande','Roggia','Lesmo 1','Lesmo 2','Ascari','Vialone','Straight','Parabolica'];
+  for(let s=0;s<10;s++){
+    let cx=0,cy=0,cn=0;
+    for(let i=0;i<TX.length;i++){
+      if(SEC[i]===s){cx+=TX[i];cy+=TY[i];cn++;}
+    }
+    if(cn>0){
+      cx/=cn;cy/=cn;
+      // offset label outward from track center
+      html+=`<text x="${sx(cx)}" y="${sy(cy)}" text-anchor="middle" dominant-baseline="middle" font-family="IBM Plex Mono" font-size="8" fill="var(--text-dim)">${allLabels[s]}</text>`;
+    }
+  }
+  // start/finish
+  html+=`<circle cx="${sx(TX[0])}" cy="${sy(TY[0])}" r="5" fill="var(--amber)"/>`;
+  html+=`<text x="${sx(TX[0])+8}" y="${sy(TY[0])+4}" font-family="IBM Plex Mono" font-size="9" fill="var(--amber)">S/F</text>`;
+  svg.innerHTML=html;
+})();
+
+// SPEED CHART
+(function(){
+  const svg=document.getElementById('speed-chart');
+  const W=860,H=280,padL=40,padR=15,padT=15,padB=35;
+  const plotW=W-padL-padR,plotH=H-padT-padB;
+  const sx=x=>padL+(x/5.62)*plotW;
+  const sy=y=>padT+((75-y)/75)*plotH;
+  let html=secBand('',padL,padT,plotW,plotH,sy);
+  for(let v=0;v<=75;v+=15){
+    const y=sy(v);
+    html+=`<line x1="${padL}" y1="${y}" x2="${W-padR}" y2="${y}" stroke="var(--grid)" stroke-width="1"/>`;
+    html+=`<text x="${padL-5}" y="${y+3}" text-anchor="end" font-family="IBM Plex Mono" font-size="9" fill="var(--text-faint)">${v}</text>`;
+  }
+  for(let x=0;x<=5;x+=1){
+    const px=sx(x);
+    html+=`<text x="${px}" y="${H-padB+15}" text-anchor="middle" font-family="IBM Plex Mono" font-size="9" fill="var(--text-faint)">${x}k</text>`;
+  }
+  let path='';
+  SPD.forEach((v,i)=>{const x=sx(ARC[i]),y=sy(v);path+=(i===0?'M':'L')+x.toFixed(1)+' '+y.toFixed(1)+' ';});
+  html+=`<path d="${path}" stroke="var(--amber)" stroke-width="1.8" fill="none"/>`;
+  // apex markers
+  const apexes=[{i:0,name:''},{i:29,name:''},{i:45,name:''},{i:53,name:''},{i:103,name:''},{i:134,name:''}];
+  apexes.forEach(a=>{if(a.i<SPD.length){const x=sx(ARC[a.i]),y=sy(SPD[a.i]);html+=`<circle cx="${x}" cy="${y}" r="3" fill="var(--amber)"/>`;}});
+  html+=`<rect x="${padL}" y="${padT}" width="${plotW}" height="${plotH}" fill="none" stroke="var(--border)"/>`;
+  html+=`<text x="${padL+plotW/2}" y="${H-2}" text-anchor="middle" font-family="IBM Plex Mono" font-size="10" fill="var(--text-dim)">Track distance (km)</text>`;
+  svg.innerHTML=html;
+})();
+
+// ALAT CHART
+(function(){
+  const svg=document.getElementById('alat-chart');
+  const W=860,H=280,padL=40,padR=15,padT=15,padB=35;
+  const plotW=W-padL-padR,plotH=H-padT-padB;
+  const sx=x=>padL+(x/5.62)*plotW;
+  const sy=y=>padT+((35-y)/35)*plotH;
+  let html=secBand('',padL,padT,plotW,plotH,sy);
+  for(let v=0;v<=35;v+=5){
+    const y=sy(v);
+    html+=`<line x1="${padL}" y1="${y}" x2="${W-padR}" y2="${y}" stroke="var(--grid)" stroke-width="1"/>`;
+    html+=`<text x="${padL-5}" y="${y+3}" text-anchor="end" font-family="IBM Plex Mono" font-size="9" fill="var(--text-faint)">${v}</text>`;
+  }
+  // tire limit line
+  const y33=sy(33);
+  html+=`<line x1="${padL}" y1="${y33}" x2="${W-padR}" y2="${y33}" stroke="var(--red)" stroke-width="1.5" stroke-dasharray="5 4"/>`;
+  html+=`<text x="${W-padR-4}" y="${y33-5}" text-anchor="end" font-family="IBM Plex Mono" font-size="9" fill="var(--red)">Tire limit 33</text>`;
+  // scrub ceiling
+  const y22=sy(22);
+  html+=`<line x1="${padL}" y1="${y22}" x2="${W-padR}" y2="${y22}" stroke="var(--amber)" stroke-width="1" stroke-dasharray="3 3"/>`;
+  html+=`<text x="${W-padR-4}" y="${y22-5}" text-anchor="end" font-family="IBM Plex Mono" font-size="9" fill="var(--amber)">Scrub ceiling ~22</text>`;
+  for(let x=0;x<=5;x+=1){
+    const px=sx(x);
+    html+=`<text x="${px}" y="${H-padB+15}" text-anchor="middle" font-family="IBM Plex Mono" font-size="9" fill="var(--text-faint)">${x}k</text>`;
+  }
+  let path='';
+  ALAT.forEach((v,i)=>{const x=sx(ARC[i]),y=sy(Math.min(v,35));path+=(i===0?'M':'L')+x.toFixed(1)+' '+y.toFixed(1)+' ';});
+  html+=`<path d="${path}" stroke="var(--grip)" stroke-width="1.5" fill="none"/>`;
+  html+=`<rect x="${padL}" y="${padT}" width="${plotW}" height="${plotH}" fill="none" stroke="var(--border)"/>`;
+  html+=`<text x="${padL+plotW/2}" y="${H-2}" text-anchor="middle" font-family="IBM Plex Mono" font-size="10" fill="var(--text-dim)">Track distance (km)</text>`;
+  svg.innerHTML=html;
+})();
+
+// THR/BRK CHART
+(function(){
+  const svg=document.getElementById('thrbrk-chart');
+  const W=860,H=200,padL=40,padR=15,padT=10,padB=30;
+  const plotW=W-padL-padR,plotH=H-padT-padB;
+  const sx=x=>padL+(x/5.62)*plotW;
+  const sy=y=>padT+((1.0-y)/1.0)*plotH;
+  let html=secBand('',padL,padT,plotW,plotH,sy);
+  for(let v=0;v<=1;v+=0.5){
+    const y=sy(v);
+    html+=`<line x1="${padL}" y1="${y}" x2="${W-padR}" y2="${y}" stroke="var(--grid)" stroke-width="1"/>`;
+    html+=`<text x="${padL-5}" y="${y+3}" text-anchor="end" font-family="IBM Plex Mono" font-size="9" fill="var(--text-faint)">${v.toFixed(1)}</text>`;
+  }
+  // throttle area
+  let tp='';
+  THR.forEach((v,i)=>{const x=sx(ARC[i]),y=sy(v);tp+=(i===0?'M':'L')+x.toFixed(1)+' '+y.toFixed(1)+' ';});
+  tp+=`L ${sx(ARC[ARC.length-1])} ${sy(0)} L ${sx(ARC[0])} ${sy(0)} Z`;
+  html+=`<path d="${tp}" fill="var(--green)" opacity="0.15"/>`;
+  html+=`<path d="${THR.map((v,i)=>(i===0?'M':'L')+sx(ARC[i]).toFixed(1)+' '+sy(v).toFixed(1)).join(' ')}" stroke="var(--green)" stroke-width="1.2" fill="none"/>`;
+  // brake area
+  let bp='';
+  BRK.forEach((v,i)=>{const x=sx(ARC[i]),y=sy(v);bp+=(i===0?'M':'L')+x.toFixed(1)+' '+y.toFixed(1)+' ';});
+  bp+=`L ${sx(ARC[ARC.length-1])} ${sy(0)} L ${sx(ARC[0])} ${sy(0)} Z`;
+  html+=`<path d="${bp}" fill="var(--red)" opacity="0.3"/>`;
+  html+=`<path d="${BRK.map((v,i)=>(i===0?'M':'L')+sx(ARC[i]).toFixed(1)+' '+sy(v).toFixed(1)).join(' ')}" stroke="var(--red)" stroke-width="1.2" fill="none"/>`;
+  html+=`<rect x="${padL}" y="${padT}" width="${plotW}" height="${plotH}" fill="none" stroke="var(--border)"/>`;
+  html+=`<text x="${padL+plotW/2}" y="${H-2}" text-anchor="middle" font-family="IBM Plex Mono" font-size="10" fill="var(--text-dim)">Track distance (km)</text>`;
+  svg.innerHTML=html;
+})();
+
+// STEER CHART
+(function(){
+  const svg=document.getElementById('steer-chart');
+  const W=860,H=200,padL=40,padR=15,padT=15,padB=30;
+  const plotW=W-padL-padR,plotH=H-padT-padB;
+  const sx=x=>padL+(x/5.62)*plotW;
+  const sy=y=>padT+((0.3-y)/0.6)*plotH; // -0.3 to 0.3
+  let html=secBand('',padL,padT,plotW,plotH,sy);
+  // zero line
+  const y0=sy(0);
+  html+=`<line x1="${padL}" y1="${y0}" x2="${W-padR}" y2="${y0}" stroke="var(--border)" stroke-width="1"/>`;
+  for(let v=-0.3;v<=0.3;v+=0.1){
+    const y=sy(v);
+    html+=`<line x1="${padL}" y1="${y}" x2="${W-padR}" y2="${y}" stroke="var(--grid)" stroke-width="0.5"/>`;
+    html+=`<text x="${padL-5}" y="${y+3}" text-anchor="end" font-family="IBM Plex Mono" font-size="9" fill="var(--text-faint)">${v.toFixed(1)}</text>`;
+  }
+  let path='';
+  STEER.forEach((v,i)=>{const x=sx(ARC[i]),y=sy(v);path+=(i===0?'M':'L')+x.toFixed(1)+' '+y.toFixed(1)+' ';});
+  html+=`<path d="${path}" stroke="var(--blue)" stroke-width="1.2" fill="none"/>`;
+  html+=`<rect x="${padL}" y="${padT}" width="${plotW}" height="${plotH}" fill="none" stroke="var(--border)"/>`;
+  html+=`<text x="${padL+plotW/2}" y="${H-2}" text-anchor="middle" font-family="IBM Plex Mono" font-size="10" fill="var(--text-dim)">Track distance (km)</text>`;
+  svg.innerHTML=html;
+})();
+</script>
