@@ -196,7 +196,7 @@ steering-scale tuning has effect. The per-section multipliers (Curva Grande +6.4
 Lesmo 1 +13.7%, Lesmo 2 −4.4%, Parabolica +3.6%) adjust authority on these sustained
 deflections without touching the chicane transitions.
 
-### Why 320 seconds is the ceiling
+### Why 320 seconds is the ceiling hard to break
 
 The grip-limit lap (all apexes at v@33) would take ~96 seconds. The achieved flying
 lap is 104.5 seconds. The 8.5-second gap is almost entirely scrub — the car enters
